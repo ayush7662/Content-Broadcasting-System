@@ -1,328 +1,156 @@
-# Postman Testing Guide - Content Broadcasting System
 
-## Base URL
-```
-http://localhost:3000
-```
 
----
 
-## Step 1: Register Users
+# 🌐 Content Broadcasting System API
 
-### 1.1 Register Principal (Admin)
-```http
-POST http://localhost:3000/auth/register
-Content-Type: application/json
-
-{
-  "name": "Principal Kumar",
-  "email": "principal@test.com",
-  "password": "123456",
-  "role": "principal"
-}
-```
-
-### 1.2 Register Teacher 1
-```http
-POST http://localhost:3000/auth/register
-Content-Type: application/json
-
-{
-  "name": "Teacher Sharma",
-  "email": "teacher1@test.com",
-  "password": "123456",
-  "role": "teacher"
-}
-```
-
-### 1.3 Register Teacher 2
-```http
-POST http://localhost:3000/auth/register
-Content-Type: application/json
-
-{
-  "name": "Teacher Gupta",
-  "email": "teacher2@test.com",
-  "password": "123456",
-  "role": "teacher"
-}
-```
+A role-based content broadcasting backend where teachers upload content and principals approve or reject it, with scheduled live delivery.
 
 ---
 
-## Step 2: Login
+## 🚀 Base URL
 
-### 2.1 Login as Principal
-```http
-POST http://localhost:3000/auth/login
-Content-Type: application/json
-
-{
-  "email": "principal@test.com",
-  "password": "123456"
-}
-```
-**Save the `token` from response for Principal requests.**
-
-### 2.2 Login as Teacher 1
-```http
-POST http://localhost:3000/auth/login
-Content-Type: application/json
-
-{
-  "email": "teacher1@test.com",
-  "password": "123456"
-}
-```
-**Save the `token` from response for Teacher 1 requests.**
-
-### 2.3 Login as Teacher 2
-```http
-POST http://localhost:3000/auth/login
-Content-Type: application/json
-
-{
-  "email": "teacher2@test.com",
-  "password": "123456"
-}
-```
-**Save the `token` from response for Teacher 2 requests.**
+https://content-broadcasting-system-wma9.onrender.com
 
 ---
 
-## Step 3: Get My Profile
-```http
-GET http://localhost:3000/auth/me
-Authorization: Bearer <your_token_here>
-```
+## 🔐 Authentication
+
+### Register User
+
+POST /auth/register
+
+Request Body:
+{
+"name": "Teacher1",
+"email": "[teacher1@gmail.com](mailto:teacher1@gmail.com)",
+"password": "123456",
+"role": "teacher"
+}
+
+Response:
+{
+"id": 1,
+"name": "Teacher1",
+"email": "[teacher1@gmail.com](mailto:teacher1@gmail.com)",
+"role": "teacher"
+}
 
 ---
 
-## Step 4: Teacher Uploads Content
+### Login User
 
-### 4.1 Upload Maths Content (Teacher 1)
-```http
-POST http://localhost:3000/content/upload
-Authorization: Bearer <teacher1_token>
+POST /auth/login
+
+Request Body:
+{
+"email": "[teacher1@gmail.com](mailto:teacher1@gmail.com)",
+"password": "123456"
+}
+
+Response:
+{
+"token": "JWT_TOKEN"
+}
+
+---
+
+## 📤 Content Management
+
+### Upload Content (Teacher)
+
+POST /content/upload
+
+Headers:
+Authorization: Bearer <token>
 Content-Type: multipart/form-data
 
 Form Data:
-- title: "Maths Chapter 1"
-- description: "Algebra basics"
-- subject: "Maths"
-- start_time: "2025-01-01T00:00:00Z"
-- end_time: "2026-12-31T23:59:59Z"
-- file: <select a JPG/PNG/GIF file>
-```
-
-### 4.2 Upload Science Content (Teacher 1)
-```http
-POST http://localhost:3000/content/upload
-Authorization: Bearer <teacher1_token>
-Content-Type: multipart/form-data
-
-Form Data:
-- title: "Science Chapter 1"
-- description: "Physics basics"
-- subject: "Science"
-- start_time: "2025-01-01T00:00:00Z"
-- end_time: "2026-12-31T23:59:59Z"
-- file: <select a JPG/PNG/GIF file>
-```
-
-### 4.3 Upload Maths Content (Teacher 2)
-```http
-POST http://localhost:3000/content/upload
-Authorization: Bearer <teacher2_token>
-Content-Type: multipart/form-data
-
-Form Data:
-- title: "Maths Chapter 2"
-- description: "Geometry"
-- subject: "Maths"
-- start_time: "2025-01-01T00:00:00Z"
-- end_time: "2026-12-31T23:59:59Z"
-- file: <select a JPG/PNG/GIF file>
-```
+title
+description
+subject
+start_time
+end_time
+file
 
 ---
 
-## Step 5: Teacher Views Their Uploads
-```http
-GET http://localhost:3000/content/my-uploads
-Authorization: Bearer <teacher1_token>
-```
+### Approve Content (Principal)
 
-Optional filters:
-```http
-GET http://localhost:3000/content/my-uploads?status=pending
-GET http://localhost:3000/content/my-uploads?subject=Maths
-```
+PUT /content/approve/:id
 
----
+Headers:
+Authorization: Bearer <token>
 
-## Step 6: Principal Views All Content
-```http
-GET http://localhost:3000/content/all
-Authorization: Bearer <principal_token>
-```
-
-With filters:
-```http
-GET http://localhost:3000/content/all?status=pending
-GET http://localhost:3000/content/all?subject=Maths
-GET http://localhost:3000/content/all?teacher_id=1
-GET http://localhost:3000/content/all?page=1&limit=10
-```
-
----
-
-## Step 7: Principal Views Pending Content
-```http
-GET http://localhost:3000/content/pending
-Authorization: Bearer <principal_token>
-```
-
----
-
-## Step 8: Principal Approves Content
-```http
-PUT http://localhost:3000/content/approve/1
-Authorization: Bearer <principal_token>
-```
-
----
-
-## Step 9: Principal Rejects Content
-```http
-PUT http://localhost:3000/content/reject/2
-Authorization: Bearer <principal_token>
-Content-Type: application/json
-
+Response:
 {
-  "reason": "Content quality is not sufficient"
+"msg": "Approved"
 }
-```
 
 ---
 
-## Step 10: Get Content by ID
-```http
-GET http://localhost:3000/content/1
-Authorization: Bearer <any_valid_token>
-```
+### Reject Content (Principal)
+
+PUT /content/reject/:id
+
+Headers:
+Authorization: Bearer <token>
+
+Body:
+{
+"reason": "Not valid content"
+}
 
 ---
 
-## Step 11: Public Broadcasting API (No Auth Required)
+### Get Live Content
 
-### 11.1 Get Live Content for Teacher 1
-```http
-GET http://localhost:3000/content/live/1
-```
+GET /content/live/:teacherId
 
-### 11.2 Get Live Content for Teacher 1 with Subject Filter
-```http
-GET http://localhost:3000/content/live/1?subject=Maths
-```
-
-### 11.3 Get Live Content for Teacher 2
-```http
-GET http://localhost:3000/content/live/2
-```
+Response:
+{
+"data": []
+}
 
 ---
 
-## Step 12: Delete Content
-```http
-DELETE http://localhost:3000/content/1
-Authorization: Bearer <teacher1_token_or_principal_token>
-```
+## 🔐 Authorization
+
+All protected routes require:
+Authorization: Bearer YOUR_JWT_TOKEN
 
 ---
 
-## Important Notes
+## 📁 File Access
 
-1. **Authorization Header**: Always use `Bearer <token>` format
-2. **File Upload**: In Postman, select `form-data` and choose `File` type for the `file` field
-3. **Allowed File Types**: Only JPG, PNG, GIF (max 10MB)
-4. **Date Format**: Use ISO 8601 format like `2025-01-01T00:00:00Z`
-5. **Live API**: No authentication required, but rate limited to 100 requests/minute
-6. **Role Check**: Teachers can only upload/view their own content. Principal can approve/reject/view all.
+GET /uploads/{filename}
+
+Example:
+GET /uploads/sample.png
 
 ---
 
-## Expected Response Examples
+## 🧠 Role-Based Access
 
-### Register Success
-```json
-{
-  "msg": "User registered successfully",
-  "user": {
-    "id": 1,
-    "name": "Principal Kumar",
-    "email": "principal@test.com",
-    "role": "principal"
-  }
-}
-```
+Teacher → Upload content
+Principal → Approve / Reject content
 
-### Login Success
-```json
-{
-  "msg": "Login successful",
-  "token": "eyJhbGciOiJIUzI1NiIs...",
-  "user": {
-    "id": 1,
-    "name": "Principal Kumar",
-    "email": "principal@test.com",
-    "role": "principal"
-  }
-}
-```
+---
 
-### Upload Success
-```json
-{
-  "msg": "Content uploaded successfully",
-  "data": {
-    "id": 1,
-    "title": "Maths Chapter 1",
-    "subject": "Maths",
-    "status": "pending",
-    "file_url": "/uploads/1234567890_image.png",
-    ...
-  }
-}
-```
+## 🔄 Application Flow
 
-### Live Content Success
-```json
-{
-  "msg": "Live content fetched successfully",
-  "data": [
-    {
-      "subject": "Maths",
-      "content": {
-        "id": 1,
-        "title": "Maths Chapter 1",
-        "file_url": "/uploads/1234567890_image.png"
-      },
-      "rotation": {
-        "current_index": 0,
-        "total_items": 2,
-        "rotation_duration_minutes": 5
-      }
-    }
-  ]
-}
-```
+Teacher → Register → Login → Upload Content
+↓
+Principal → Login → Approve / Reject
+↓
+Live API → Shows scheduled approved content
 
-### No Content Available
-```json
-{
-  "msg": "No content available",
-  "data": []
-}
-```
+---
 
+## 📌 Notes
+
+* JWT token is required for all protected APIs
+* Only teachers can upload content
+* Only principals can approve or reject content
+* Live API returns only approved and scheduled content
+
+---
